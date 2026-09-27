@@ -1,0 +1,50 @@
+# --- Datasets, weights, checkpoints, large outputs (never commit) ---
+data/raw/*
+data/processed/*
+!data/README.md
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Pretrained weights and checkpoints
+*.pth
+*.pt
+*.ckpt
+*.onnx
+*.safetensors
+checkpoints/
+weights/
+
+# Results: ignore everything except the final summary table and committed figures
+results/*
+!results/README.md
+!results/summary_table.csv
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.python-version
+
+# --- Notebooks ---
+.ipynb_checkpoints/
+
+# --- Tooling / IDE ---
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.vscode/
+.idea/
+
+# --- Experiment tracking ---
+wandb/
+
+# --- OS ---
+Thumbs.db
+Desktop.ini
+.DS_Store

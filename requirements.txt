@@ -1,0 +1,36 @@
+# DermaPath dependencies.
+#
+# NOTE: torch / torchvision are installed separately from the CUDA-enabled index
+# (see the Task 2 environment setup), NOT from this file, so that the correct
+# GPU build is selected for the local RTX 4070 Ti. Exact versions are pinned in
+# Task 2 once the environment is built and verified.
+#
+# Core numerics / imaging
+numpy
+pillow
+scipy
+scikit-image
+opencv-python-headless
+
+# Medical-imaging preprocessing, augmentation, and metrics
+monai
+
+# Config, progress, tables
+pyyaml
+tqdm
+pandas
+
+# Interpretability
+grad-cam
+
+# Experiment tracking (optional, enabled via config)
+wandb
+
+# Plotting (EDA + figures)
+matplotlib
+
+# Dashboard (built last)
+gradio
+
+# Testing
+pytest
