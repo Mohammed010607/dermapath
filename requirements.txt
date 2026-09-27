@@ -1,36 +1,50 @@
-# DermaPath dependencies.
+# DermaPath dependencies (Python 3.11).
 #
-# NOTE: torch / torchvision are installed separately from the CUDA-enabled index
-# (see the Task 2 environment setup), NOT from this file, so that the correct
-# GPU build is selected for the local RTX 4070 Ti. Exact versions are pinned in
-# Task 2 once the environment is built and verified.
+# Reproduce the exact environment with:
+#     python -m venv .venv
+#     .\.venv\Scripts\Activate.ps1        # PowerShell
+#     python -m pip install --upgrade pip
+#     python -m pip install -r requirements.txt
 #
+# torch/torchvision are the CUDA 12.6 (cu126) Windows builds, resolved from the
+# official PyTorch wheel index below. The '+cu126' local version pins the GPU
+# build; the extra index is where those wheels live. Verified against
+# https://download.pytorch.org/whl/cu126/ for the RTX 4070 Ti (driver 595.97).
+#
+# requirements.lock.txt holds the full transitive freeze for byte-exact rebuilds.
+
+--extra-index-url https://download.pytorch.org/whl/cu126
+
+# Deep learning framework (GPU / CUDA 12.6)
+torch==2.14.0+cu126
+torchvision==0.29.0+cu126
+
 # Core numerics / imaging
-numpy
-pillow
-scipy
-scikit-image
-opencv-python-headless
+numpy==2.4.6
+pillow==12.3.0
+scipy==1.17.1
+scikit-image==0.26.0
+opencv-python-headless==5.0.0.93
 
 # Medical-imaging preprocessing, augmentation, and metrics
-monai
+monai==1.6.0
 
 # Config, progress, tables
-pyyaml
-tqdm
-pandas
+pyyaml==6.0.3
+tqdm==4.70.1
+pandas==3.0.6
 
 # Interpretability
-grad-cam
+grad-cam==1.5.7
 
 # Experiment tracking (optional, enabled via config)
-wandb
+wandb==0.30.0
 
 # Plotting (EDA + figures)
-matplotlib
+matplotlib==3.11.2
 
 # Dashboard (built last)
-gradio
+gradio==6.28.0
 
 # Testing
-pytest
+pytest==9.1.1
