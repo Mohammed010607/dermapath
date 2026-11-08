@@ -27,4 +27,12 @@ def build_model(config: dict):
             vit_name=model_cfg.get("vit_name", "R50-ViT-B_16"),
         )
 
+    if name == "swin_unet":
+        from .swin_unet import build_swin_unet
+
+        return build_swin_unet(
+            img_size=model_cfg.get("img_size", 224),
+            num_classes=model_cfg.get("out_channels", 1),
+        )
+
     raise ValueError(f"unknown model name: {name!r}")
