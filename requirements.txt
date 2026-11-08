@@ -42,6 +42,7 @@ wandb==0.30.0
 
 # Plotting (EDA + figures)
 matplotlib==3.11.2
+seaborn==0.13.2
 
 # Dashboard (built last)
 gradio==6.28.0
