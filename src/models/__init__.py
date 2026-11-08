@@ -1,8 +1,10 @@
 """Segmentation model implementations and a config-driven factory."""
 
+from pathlib import Path
+
 from .unet import UNet
 
-__all__ = ["UNet", "build_model"]
+__all__ = ["UNet", "build_model", "load_pretrained"]
 
 
 def build_model(config: dict):
@@ -36,3 +38,36 @@ def build_model(config: dict):
         )
 
     raise ValueError(f"unknown model name: {name!r}")
+
+
+def load_pretrained(model, config) -> bool:
+    """Load ImageNet pretrained weights into a model, based on its config.
+
+    UNet has no pretrained initialisation (it is the from-scratch baseline). TransUNet and
+    Swin-UNet load the ImageNet weights named by ``model.pretrained`` if that file exists.
+    Returns True if weights were loaded.
+    """
+    model_cfg = config["model"]
+    name = model_cfg["name"].lower()
+    path = model_cfg.get("pretrained")
+    if not path:
+        return False
+    path = Path(path)
+    if not path.exists():
+        print(f"pretrained weights not found ({path}); using random initialisation")
+        return False
+
+    if name == "transunet":
+        import numpy as np
+
+        model.load_from(np.load(str(path)))
+    elif name == "swin_unet":
+        from .swin_unet import load_swin_pretrained
+
+        load_swin_pretrained(model, path)
+    else:
+        print(f"no pretrained loader for {name!r}; using random initialisation")
+        return False
+
+    print(f"loaded pretrained weights: {path}")
+    return True

@@ -6,3 +6,4 @@ model:
   in_channels: 3
   out_channels: 1
   img_size: 224
+  pretrained: weights/swin_tiny_patch4_window7_224.pth  # downloaded by scripts/download_weights.py

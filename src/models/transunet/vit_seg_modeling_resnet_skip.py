@@ -1,6 +1,9 @@
 import math
 
-from os.path import join as pjoin
+# Join weight-key parts with "/" (not os.path.join, which uses "\" on Windows) so the
+# pretrained-weight lookup works cross-platform.
+def pjoin(*parts):
+    return "/".join(parts)
 from collections import OrderedDict
 
 import torch

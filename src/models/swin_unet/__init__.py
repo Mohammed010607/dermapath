@@ -9,6 +9,9 @@ repository's yacs config layer) for binary lesion segmentation at 224x224.
 
 from __future__ import annotations
 
+import copy
+
+import torch
 import torch.nn as nn
 
 from .swin_transformer_unet_skip_expand_decoder_sys import SwinTransformerSys
@@ -50,4 +53,30 @@ def build_swin_unet(img_size: int = 224, num_classes: int = 1,
     )
 
 
-__all__ = ["build_swin_unet", "SwinTransformerSys", "SWIN_TINY"]
+def load_swin_pretrained(model: SwinTransformerSys, ckpt_path) -> str:
+    """Load ImageNet Swin-Tiny weights into both encoder and decoder.
+
+    Adapted from the official Swin-Unet ``load_from``: the encoder ``layers.*`` weights are
+    copied and also mirrored into the decoder ``layers_up.*`` (with reversed stage order),
+    since pretraining both halves is important for a pure-transformer model. Weights whose
+    shapes do not match (e.g. the classification head) are dropped. Returns the
+    missing/unexpected-key report from ``load_state_dict``.
+    """
+    checkpoint = torch.load(ckpt_path, map_location="cpu", weights_only=False)
+    pretrained = checkpoint["model"] if "model" in checkpoint else checkpoint
+
+    model_dict = model.state_dict()
+    full = copy.deepcopy(pretrained)
+    for k, v in pretrained.items():
+        if "layers." in k:
+            stage = 3 - int(k[7:8])  # mirror encoder stage onto the decoder
+            full["layers_up." + str(stage) + k[8:]] = v
+    for k in list(full.keys()):
+        if k in model_dict and full[k].shape != model_dict[k].shape:
+            del full[k]
+
+    msg = model.load_state_dict(full, strict=False)
+    return str(msg)
+
+
+__all__ = ["build_swin_unet", "load_swin_pretrained", "SwinTransformerSys", "SWIN_TINY"]

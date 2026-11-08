@@ -34,7 +34,9 @@ augmentation:
 # Training harness (consumed in Task 7). Values follow the thesis methodology.
 training:
   epochs: 100
-  batch_size: 16          # revisited after the Task 7/8/9 smoke tests pick the size that fits all models
+  # Common batch size for all three models (fair comparison). Per-model VRAM maxima on the
+  # 12 GB card are UNet 64 / TransUNet 32 / Swin-UNet 48, so 32 is the largest that fits all.
+  batch_size: 32
   optimizer: adam         # thesis specifies Adam
   learning_rate: 1.0e-4   # thesis specifies 1e-4
   weight_decay: 0.0

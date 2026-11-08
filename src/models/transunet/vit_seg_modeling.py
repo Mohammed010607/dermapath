@@ -7,7 +7,10 @@ import copy
 import logging
 import math
 
-from os.path import join as pjoin
+# The pretrained-weight keys use forward slashes; os.path.join would use backslashes on
+# Windows and break the lookup, so join with "/" explicitly for cross-platform loading.
+def pjoin(*parts):
+    return "/".join(parts)
 
 import torch
 import torch.nn as nn

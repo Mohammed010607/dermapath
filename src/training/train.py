@@ -28,7 +28,7 @@ set_track_meta(False)
 
 from src.datasets import build_dataloader, build_dataset
 from src.evaluation.metrics import dice_coefficient
-from src.models import build_model
+from src.models import build_model, load_pretrained
 from src.training.losses import DiceBCELoss
 from src.utils.checkpointing import save_checkpoint
 from src.utils.config import load_config
@@ -137,6 +137,7 @@ def parse_args():
     p.add_argument("--find-max-batch-size", action="store_true",
                    help="probe the largest batch size that fits, then exit")
     p.add_argument("--no-wandb", action="store_true", help="disable W&B even if the config enables it")
+    p.add_argument("--no-pretrained", action="store_true", help="skip loading pretrained weights")
     return p.parse_args()
 
 
@@ -179,7 +180,10 @@ def main():
     val_loader = build_dataloader(val_ds, batch_size, shuffle=False, num_workers=workers, seed=seed)
     print(f"train={len(train_ds)}  val={len(val_ds)}  batch_size={batch_size}  workers={workers}")
 
-    model = build_model(config).to(device)
+    model = build_model(config)
+    if not args.no_pretrained:
+        load_pretrained(model, config)
+    model = model.to(device)
     criterion = DiceBCELoss(bce_weight=0.5).to(device)
 
     tr = config["training"]
