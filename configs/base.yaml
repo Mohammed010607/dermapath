@@ -7,10 +7,15 @@ seed: 42
 deterministic: true
 
 data:
-  root: data/raw          # contains train/, val/, test/ with images/ and masks/
+  # 224x224 cache produced by scripts/preprocess_isic2018.py from data/raw.
+  # Reading the small cached files (instead of the ~27 MP originals) makes training
+  # GPU-bound. Point this at data/raw to train directly from the originals instead.
+  root: data/processed
   # Official challenge splits - used as-is, never re-split.
   splits: [train, val, test]
-  num_workers: 4
+  # With the small 224x224 cache, single-process loading is fastest on Windows: spawned
+  # worker IPC overhead outweighs the light per-sample work, so 0 keeps training GPU-bound.
+  num_workers: 0
 
 preprocessing:
   img_size: 224           # all models use 224x224 (Swin-UNet requires it); keeps the comparison fair

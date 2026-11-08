@@ -24,6 +24,7 @@ from .transforms import build_eval_transforms, build_train_transforms
 
 MASK_SUFFIX = "_segmentation"
 SPLITS = ("train", "val", "test")
+IMAGE_EXTS = (".jpg", ".jpeg", ".png")  # raw images are .jpg; the 224 cache is .png
 
 
 class ISICDataset(Dataset):
@@ -39,11 +40,14 @@ class ISICDataset(Dataset):
         self.img_dir = self.root / split / "images"
         self.msk_dir = self.root / split / "masks"
 
+        # Map each ISIC id to its image file (any supported extension).
+        self._img_by_id: dict[str, Path] = {}
+        for ext in IMAGE_EXTS:
+            for img in self.img_dir.glob(f"*{ext}"):
+                self._img_by_id.setdefault(img.stem, img)
+
         # Keep only images that have a matching mask; store the sorted ISIC ids.
-        ids = []
-        for img in sorted(self.img_dir.glob("*.jpg")):
-            if (self.msk_dir / f"{img.stem}{MASK_SUFFIX}.png").exists():
-                ids.append(img.stem)
+        ids = [stem for stem in sorted(self._img_by_id) if self.mask_path(stem).exists()]
         if not ids:
             raise FileNotFoundError(f"no image/mask pairs found under {self.root / split}")
         self.ids = ids
@@ -52,7 +56,7 @@ class ISICDataset(Dataset):
         return len(self.ids)
 
     def image_path(self, stem: str) -> Path:
-        return self.img_dir / f"{stem}.jpg"
+        return self._img_by_id[stem]
 
     def mask_path(self, stem: str) -> Path:
         return self.msk_dir / f"{stem}{MASK_SUFFIX}.png"

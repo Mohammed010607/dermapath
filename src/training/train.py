@@ -18,8 +18,13 @@ import time
 from pathlib import Path
 
 import torch
+from monai.data.meta_obj import set_track_meta
 from torch.optim import Adam
 from torch.optim.lr_scheduler import CosineAnnealingLR
+
+# The transforms produce MONAI MetaTensors; metadata tracking is not needed once a batch
+# reaches the model, and disabling it removes per-operation overhead during forward/backward.
+set_track_meta(False)
 
 from src.datasets import build_dataloader, build_dataset
 from src.evaluation.metrics import dice_coefficient

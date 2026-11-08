@@ -60,6 +60,15 @@ The ISIC 2018 Task 1 data is not distributed with this repository. Use
 `scripts/download_isic2018.py` to fetch it from the official ISIC challenge archive. See
 `data/README.md` for details.
 
+Then build the 224x224 training cache once (makes epochs GPU-bound rather than spending each
+epoch decoding the full-resolution originals):
+
+```
+python scripts/preprocess_isic2018.py
+```
+
+This writes `data/processed/`, which the training config reads by default.
+
 ## Notebooks
 
 The exploratory data analysis lives in `notebooks/01_eda.ipynb`. It runs against the
