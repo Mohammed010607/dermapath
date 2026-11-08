@@ -59,3 +59,19 @@ other architectures under the same harness.
 The ISIC 2018 Task 1 data is not distributed with this repository. Use
 `scripts/download_isic2018.py` to fetch it from the official ISIC challenge archive. See
 `data/README.md` for details.
+
+## Notebooks
+
+The exploratory data analysis lives in `notebooks/01_eda.ipynb`. It runs against the
+project virtual environment through a dedicated Jupyter kernel. After creating the venv and
+installing `requirements-dev.txt`, register the kernel once:
+
+```
+python -m ipykernel install --user --name dermapath-venv --display-name "DermaPath (.venv)"
+```
+
+Then run it from the command line (figures are written to `results/figures/eda/`):
+
+```
+jupyter nbconvert --to notebook --execute --inplace notebooks/01_eda.ipynb
+```
