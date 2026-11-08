@@ -33,6 +33,7 @@ monai==1.6.0
 pyyaml==6.0.3
 tqdm==4.70.1
 pandas==3.0.6
+ml_collections==1.1.0   # required by the official TransUNet config definitions
 
 # Interpretability
 grad-cam==1.5.7

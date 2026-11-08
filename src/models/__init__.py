@@ -18,4 +18,13 @@ def build_model(config: dict):
             bilinear=model_cfg.get("bilinear", False),
         )
 
+    if name == "transunet":
+        from .transunet import build_transunet
+
+        return build_transunet(
+            img_size=model_cfg.get("img_size", 224),
+            num_classes=model_cfg.get("out_channels", 1),
+            vit_name=model_cfg.get("vit_name", "R50-ViT-B_16"),
+        )
+
     raise ValueError(f"unknown model name: {name!r}")

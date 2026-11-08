@@ -77,12 +77,18 @@ def evaluate(model, loader, criterion, device, amp, max_batches=None):
     return loss_sum / max(seen, 1), dsc_sum / max(seen, 1)
 
 
-def find_max_batch_size(config, device, candidates):
-    """Probe increasing batch sizes with a real training step until CUDA runs out of memory.
+def find_max_batch_size(config, device, candidates, headroom: float = 0.90):
+    """Probe batch sizes with a real AMP train step and report the largest that fits VRAM.
 
     Batches are synthetic tensors of the true training shape (B, 3, 224, 224); memory use
     depends on shape, not pixel content, so this measures the real footprint quickly.
+
+    On Windows the NVIDIA driver silently spills oversized allocations into system RAM
+    instead of raising out-of-memory, so a batch is considered to "fit" only when its peak
+    stays within ``headroom`` of total VRAM, not merely when it avoids an OOM error.
     """
+    total = torch.cuda.get_device_properties(device).total_memory / 1024**3
+    limit = total * headroom
     criterion = DiceBCELoss().to(device)
     results, best = [], 0
     for bs in candidates:
@@ -103,17 +109,21 @@ def find_max_batch_size(config, device, candidates):
             scaler.update()
 
             peak = torch.cuda.max_memory_allocated() / 1024**3
-            results.append((bs, peak, "ok"))
-            best = bs
+            fits = peak <= limit
+            results.append((bs, peak, "fits" if fits else "over"))
+            if fits:
+                best = bs
             del model, optimizer, images, masks, loss, scaler
             torch.cuda.empty_cache()
+            if not fits:
+                break  # larger batches can only use more memory
         except RuntimeError as exc:
             if "out of memory" in str(exc).lower():
                 results.append((bs, float("nan"), "OOM"))
                 torch.cuda.empty_cache()
                 break
             raise
-    return best, results
+    return best, results, total, limit
 
 
 def parse_args():
@@ -146,12 +156,16 @@ def main():
     print(f"model={name}  device={device}")
 
     if args.find_max_batch_size:
-        best, results = find_max_batch_size(config, device, [4, 8, 16, 24, 32, 48, 64])
-        print("\nbatch-size probe (one AMP train step each):")
+        best, results, total, limit = find_max_batch_size(
+            config, device, [4, 8, 16, 24, 32, 48, 64])
+        print(f"\nbatch-size probe (one AMP train step each)  "
+              f"[VRAM {total:.1f} GB, fit limit {limit:.1f} GB]:")
         for bs, peak, status in results:
-            line = f"  bs={bs:>3}  peak={peak:5.2f} GB  OK" if status == "ok" else f"  bs={bs:>3}  OOM"
-            print(line)
-        print(f"\nmax batch size that fits: {best}")
+            if status == "OOM":
+                print(f"  bs={bs:>3}  OOM")
+            else:
+                print(f"  bs={bs:>3}  peak={peak:5.2f} GB  {status}")
+        print(f"\nmax batch size that fits in VRAM: {best}")
         return
 
     root = config["data"]["root"]
