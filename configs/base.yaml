@@ -1,0 +1,46 @@
+# Shared configuration for every model in the comparison.
+# Per-model config files (unet.yaml, transunet.yaml, swin_unet.yaml) inherit these values
+# and override only the `model` section, so the experimental conditions stay identical.
+
+# Reproducibility: one seed across Python, NumPy, and PyTorch for every run.
+seed: 42
+deterministic: true
+
+data:
+  root: data/raw          # contains train/, val/, test/ with images/ and masks/
+  # Official challenge splits - used as-is, never re-split.
+  splits: [train, val, test]
+  num_workers: 4
+
+preprocessing:
+  img_size: 224           # all models use 224x224 (Swin-UNet requires it); keeps the comparison fair
+  # ImageNet statistics - required by the pretrained ViT / Swin-Tiny encoders.
+  imagenet_mean: [0.485, 0.456, 0.406]
+  imagenet_std: [0.229, 0.224, 0.225]
+
+# Augmentation is applied to the TRAINING split only.
+augmentation:
+  flip_prob: 0.5          # independent horizontal and vertical flips
+  rotate_prob: 0.5
+  rotate_deg: 15.0        # +/- degrees
+  elastic_prob: 0.2
+  jitter_prob: 0.5        # colour jitter (brightness/contrast/saturation/hue) on the image only
+
+# Training harness (consumed in Task 7). Values follow the thesis methodology.
+training:
+  epochs: 100
+  batch_size: 16          # revisited after the Task 7/8/9 smoke tests pick the size that fits all models
+  optimizer: adam         # thesis specifies Adam
+  learning_rate: 1.0e-4   # thesis specifies 1e-4
+  weight_decay: 0.0
+  lr_schedule: cosine     # learning rate gradually decayed during training
+  amp: true               # mixed precision
+  loss: dice_bce          # combined Dice + BCE
+  early_stopping:
+    monitor: val_dsc      # early stop on validation Dice
+    mode: max
+    patience: 15
+
+logging:
+  use_wandb: false        # optional; enable per run
+  csv: true               # per-epoch train loss / val loss / val DSC
