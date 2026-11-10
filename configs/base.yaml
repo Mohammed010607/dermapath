@@ -35,8 +35,10 @@ augmentation:
 training:
   epochs: 100
   # Common batch size for all three models (fair comparison). Per-model VRAM maxima on the
-  # 12 GB card are UNet 64 / TransUNet 32 / Swin-UNet 48, so 32 is the largest that fits all.
-  batch_size: 32
+  # 12 GB card are UNet 64 / TransUNet 32 / Swin-UNet 48. 24 is used (not the 32 maximum) to
+  # leave headroom for the ~2 GB the Windows desktop holds, so long unattended runs do not
+  # risk spilling into system memory. TransUNet at 24 peaks ~7 GB.
+  batch_size: 24
   optimizer: adam         # thesis specifies Adam
   learning_rate: 1.0e-4   # thesis specifies 1e-4
   weight_decay: 0.0
