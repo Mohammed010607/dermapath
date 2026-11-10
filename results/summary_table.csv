@@ -1,0 +1,4 @@
+model,dsc_mean,dsc_std,iou_mean,iou_std,pixel_accuracy_mean,pixel_accuracy_std,sensitivity_mean,sensitivity_std,specificity_mean,specificity_std
+swin_unet,0.9063,0.1016,0.8406,0.1313,0.9463,0.0863,0.9443,0.1174,0.9396,0.1225
+transunet,0.9004,0.1072,0.8319,0.1375,0.9434,0.0862,0.9475,0.1220,0.9413,0.0953
+unet,0.8816,0.1312,0.8074,0.1654,0.9313,0.1086,0.9194,0.1632,0.9525,0.0679
